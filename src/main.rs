@@ -1,21 +1,24 @@
-mod ui;
+mod pause;
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_egui::EguiPlugin;
 
 fn main() {
     App::new()
         // default plugins
         .add_plugins(DefaultPlugins)
         .add_plugins(EguiPlugin)
-        // egui widgets
-        .add_systems(Update, ui_example_system)
+        // states
+        .add_state::<GameState>()
+        // custom plugins
+        .add_plugins(pause::PausePlugin)
         //run
         .run();
 }
 
-fn ui_example_system(mut contexts: EguiContexts) {
-    egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
-        ui.label("world");
-    });
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default, States)]
+pub enum GameState {
+    #[default]
+    Playing,
+    Paused,
 }
