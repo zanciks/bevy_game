@@ -16,7 +16,7 @@ fn main() {
         // custom plugins and systems
         .add_plugins(pause::PausePlugin)
         .add_plugins(player::PlayerPlugin)
-        .add_systems(Update, update_physics_time)
+        .add_systems(Update, (update_physics_time, grab_mouse))
         //run
         .run();
 }
@@ -36,5 +36,22 @@ fn update_physics_time(
     match game_state.get() {
         GameState::Playing => physics_time.unpause(),
         _ => physics_time.pause(),
+    }
+}
+
+fn grab_mouse(
+    mut windows: Query<&mut Window>,
+    game_state: Res<State<GameState>>,
+) {
+    let mut window = windows.single_mut();
+    match game_state.get() {
+        GameState::Playing => {
+            window.cursor.visible = false;
+            window.cursor.grab_mode = bevy::window::CursorGrabMode::Locked;
+        },
+        _ => {
+            window.cursor.visible = true;
+            window.cursor.grab_mode = bevy::window::CursorGrabMode::None;
+        }
     }
 }

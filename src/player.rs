@@ -1,9 +1,11 @@
 use bevy::prelude::*;
+use bevy::input::mouse::MouseMotion;
 use bevy_xpbd_3d::prelude::*;
 use crate::GameState;
 
 #[derive(Component)]
 pub struct Player;
+// TODO: Add speed here. Possibly settings like sensitivity?
 
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
@@ -66,7 +68,7 @@ fn setup_player(
 fn player_movement( // translational movement only
     keys: Res<Input<KeyCode>>,
     mut players: Query<(&mut Transform, &Player)>,
-    time: Res<Time>
+    time: Res<Time<Physics>>
 ) {
     for (mut transform, _player) in players.iter_mut() {
         let mut direction = Vec3::ZERO;
@@ -79,47 +81,39 @@ fn player_movement( // translational movement only
 }
 
 fn player_rotation( // lateral movement, where both camera AND player must rotate
-    keys: Res<Input<KeyCode>>,
+    mut motion_evr: EventReader<MouseMotion>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>
 ) {
     for (mut transform, _player) in players.iter_mut() {
-        let rotation_speed = 0.75;
-        let rotation = if keys.pressed(KeyCode::Left) {
-            Quat::from_rotation_y(rotation_speed * time.delta_seconds())
-        } else if keys.pressed(KeyCode::Right) {
-            Quat::from_rotation_y(-rotation_speed * time.delta_seconds())
-        } else {
-            Quat::default()
-        };
-
-        transform.rotation *= rotation;
+        for ev in motion_evr.read() {
+            let rotation_speed = 0.75;
+            let rotation = Quat::from_rotation_y(-rotation_speed * ev.delta.x * time.delta_seconds());
+            transform.rotation *= rotation;
+            // By rotating the player, we also rotate the camera, as it is a child of player!
+        }
     }
 }
 
 fn player_camera_rotation( // non-lateral movement, where ONLY the camera should move
-    keys: Res<Input<KeyCode>>,
     players: Query<&Children>,
     mut cameras: Query<(&Camera, &mut Transform)>,
-    time: Res<Time>
+    mut motion_evr: EventReader<MouseMotion>,
+    time: Res<Time<Physics>>
 ) {
     for children in players.iter() {
         for child in children.iter() {
             if let Ok((_camera, mut transform)) = cameras.get_mut(*child) {
-                let rotation_speed = 0.75;
-                let rotation = if keys.pressed(KeyCode::Up) {
-                    Quat::from_rotation_x(rotation_speed * time.delta_seconds())
-                } else if keys.pressed(KeyCode::Down) {
-                    Quat::from_rotation_x(-rotation_speed * time.delta_seconds())
-                } else {
-                    Quat::default()
-                };
+                for ev in motion_evr.read() {
+                    let rotation_speed = 0.75;
+                    let rotation = Quat::from_rotation_x(-rotation_speed * ev.delta.y * time.delta_seconds());
 
-                transform.rotation *= rotation;
+                    transform.rotation *= rotation;
 
-                let (axis, angle) = transform.rotation.to_axis_angle();
-                let clamped_angle = angle.to_degrees().clamp(-45.0, 45.0).to_radians();
-                transform.rotation = Quat::from_axis_angle(axis, clamped_angle);
+                    let (axis, angle) = transform.rotation.to_axis_angle();
+                    let clamped_angle = angle.to_degrees().clamp(-60.0, 60.0).to_radians();
+                    transform.rotation = Quat::from_axis_angle(axis, clamped_angle);
+                }
             }
         }
     }
