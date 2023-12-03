@@ -6,7 +6,7 @@ use bevy_egui::EguiPlugin;
 fn main() {
     App::new()
         // default plugins
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(bevy::log::LogPlugin::default()))
         .add_plugins(EguiPlugin)
         // states
         .add_state::<GameState>()
@@ -21,4 +21,5 @@ pub enum GameState {
     #[default]
     Playing,
     Paused,
+    QuitMenu
 }
