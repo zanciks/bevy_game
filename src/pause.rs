@@ -15,11 +15,11 @@ impl Plugin for PausePlugin {
 
 pub fn capture_input(
     keys: Res<Input<KeyCode>>,
-    ui_state: Res<State<GameState>>, // read current state
+    game_state: Res<State<GameState>>, // read current state
     mut next_state: ResMut<NextState<GameState>> // set the state for the next update
 ) {
     if keys.just_pressed(KeyCode::Escape) {
-        next_state.set(match ui_state.get() {
+        next_state.set(match game_state.get() {
             GameState::Paused => GameState::Playing,
             _ => GameState::Paused
         })
