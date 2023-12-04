@@ -93,6 +93,9 @@ fn player_movement( // translational movement only
         direction.z *= player.speed;
 
         direction = transform.rotation.mul_vec3(direction);
+        transform.rotation.x = 0.0;
+        transform.rotation.z = 0.0;
+
         transform.translation += direction * time.delta_seconds();
     }
 }
