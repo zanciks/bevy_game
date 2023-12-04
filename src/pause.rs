@@ -46,6 +46,9 @@ pub fn pause_menu(
             if ui.button("Quit").clicked() {
                 next_state.set(GameState::QuitMenu);
             }
+            if ui.button("Settings").clicked() {
+                next_state.set(GameState::SettingsMenu);
+            }
         });
 
         ui.with_layout(egui::Layout::bottom_up(egui::Align::RIGHT), |ui| {
@@ -94,5 +97,7 @@ fn quit(
         ui.label("All unsaved progress WILL be lost!");
     });
 }
+
+
 
 

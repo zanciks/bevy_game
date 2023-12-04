@@ -1,5 +1,6 @@
 mod pause;
 mod player;
+mod settings;
 
 use bevy::prelude::*;
 use bevy_egui::EguiPlugin;
@@ -11,11 +12,13 @@ fn main() {
         .add_plugins(DefaultPlugins.set(bevy::log::LogPlugin::default()))
         .add_plugins(EguiPlugin)
         .add_plugins(PhysicsPlugins::default())
-        // states
+        // states and resources
         .add_state::<GameState>()
+        .insert_resource(settings::Settings::default())
         // custom plugins and systems
         .add_plugins(pause::PausePlugin)
         .add_plugins(player::PlayerPlugin)
+        .add_plugins(settings::SettingsPlugin)
         .add_systems(Update, (update_physics_time, grab_mouse))
         //run
         .run();
@@ -26,7 +29,8 @@ pub enum GameState {
     #[default]
     Playing,
     Paused,
-    QuitMenu
+    QuitMenu,
+    SettingsMenu,
 }
 
 fn update_physics_time(
